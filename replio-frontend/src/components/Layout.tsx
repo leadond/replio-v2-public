@@ -1,11 +1,23 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Phone, Users, MessageSquare, Settings, LogOut, BarChart3 } from 'lucide-react'
+import {
+  Phone, Users, MessageSquare, Settings, LogOut, BarChart3,
+  Inbox, FileText, Clock, AlertCircle, Book, MessageCircle, HelpCircle, Zap
+} from 'lucide-react'
 
 const nav = [
   { to: '/', icon: BarChart3, label: 'Dashboard' },
+  { to: '/inbox', icon: Inbox, label: 'Inbox' },
   { to: '/callers', icon: Users, label: 'Callers' },
-  { to: '/conversations', icon: MessageSquare, label: 'Conversations' },
+  { to: '/calls', icon: Phone, label: 'Calls' },
+  { to: '/recordings', icon: Phone, label: 'Recordings' },
+  { to: '/appointments', icon: Clock, label: 'Appointments' },
+  { to: '/escalations', icon: AlertCircle, label: 'Escalations' },
+  { to: '/knowledge-base', icon: Book, label: 'Knowledge Base' },
+  { to: '/reports', icon: BarChart3, label: 'Reports' },
+  { to: '/audit-log', icon: FileText, label: 'Audit Log' },
+  { to: '/guidance', icon: HelpCircle, label: 'Guidance' },
+  { to: '/chat', icon: MessageCircle, label: 'Chat' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ]
 

@@ -1,9 +1,10 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
-from app.models.base import BaseModel
+from datetime import datetime, timezone
+import uuid
 
-class Conversation(BaseModel, table=True):
-    __tablename__ = "conversations"
+class Conversation(SQLModel, table=True):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     caller_id: str = Field(foreign_key="callers.id", index=True)
     company_id: str = Field(foreign_key="companies.id", index=True)
     call_sid: Optional[str] = None
@@ -19,3 +20,5 @@ class Conversation(BaseModel, table=True):
     recording_url: Optional[str] = None
     escalation_reason: Optional[str] = None
     handled_by: str = Field(default="ai")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

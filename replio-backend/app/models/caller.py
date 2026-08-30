@@ -1,9 +1,10 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
-from app.models.base import BaseModel
+from datetime import datetime, timezone
+import uuid
 
-class Caller(BaseModel, table=True):
-    __tablename__ = "callers"
+class Caller(SQLModel, table=True):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     phone_number: str = Field(index=True)
     name: Optional[str] = None
     email: Optional[str] = None
@@ -15,3 +16,5 @@ class Caller(BaseModel, table=True):
     notes: Optional[str] = None
     is_blocked: bool = Field(default=False)
     tags: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

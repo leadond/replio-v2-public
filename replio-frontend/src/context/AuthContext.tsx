@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
 interface User {
   id: string
   email: string
   full_name?: string
+  company_id?: string
 }
 
 interface AuthContextType {
@@ -24,7 +25,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (token) {
       fetch('/auth/me', { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => r.ok ? r.json() : null)
+        .then(async r => {
+          if (r.ok) return r.json()
+          localStorage.removeItem('token')
+          setToken(null)
+          return null
+        })
         .then(data => { if (data) setUser(data) })
         .finally(() => setLoading(false))
     } else {

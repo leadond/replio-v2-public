@@ -1,15 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from app.core.database import engine
 from app.core.config import settings
 from sqlmodel import SQLModel
-from app.routers import health, auth, callers, conversations, signalwire, elevenlabs
+from app.routers import health, auth, callers, conversations, signalwire, elevenlabs, dashboard, ollama, audit, phase4_features
+from app.routers import settings as settings_router
+from app.routers.signalwire import calls_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print("Application startup.")
+    # Create all tables
     SQLModel.metadata.create_all(engine)
-    print("Database tables ensured.")
+    print("Database tables initialized.")
     yield
     print("Shutdown complete.")
 
@@ -22,7 +27,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:3000", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,8 +38,14 @@ app.include_router(auth.router)
 app.include_router(callers.router)
 app.include_router(conversations.router)
 app.include_router(signalwire.router)
+app.include_router(calls_router)
 app.include_router(elevenlabs.router)
+app.include_router(dashboard.router)
+app.include_router(settings_router.router)
+app.include_router(ollama.router)
+app.include_router(audit.router)
+app.include_router(phase4_features.router)
 
-@app.get("/")
+@app.get("/api/")
 async def root():
     return {"name": "Replio API", "version": "2.0.0", "status": "operational"}

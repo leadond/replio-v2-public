@@ -9,6 +9,8 @@ class UserCreate(BaseModel):
     email: str
     password: str
     full_name: Optional[str] = None
+    company_name: Optional[str] = None
+    company_id: Optional[str] = None
 
 class UserRead(BaseModel):
     id: str
@@ -16,6 +18,7 @@ class UserRead(BaseModel):
     full_name: Optional[str] = None
     is_active: bool
     is_superuser: bool
+    company_id: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: str

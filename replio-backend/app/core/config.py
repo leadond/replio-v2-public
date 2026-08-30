@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     SIGNALWIRE_API_TOKEN: str = ""
     SIGNALWIRE_SPACE: str = ""
     SIGNALWIRE_PHONE_NUMBER: str = ""
+    MOCK_SIGNALWIRE: bool = True
     ELEVENLABS_API_KEY: str = ""
     ELEVENLABS_AGENT_ID: str = ""
     ELEVENLABS_WEBHOOK_SECRET: str = ""
