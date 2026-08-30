@@ -25,10 +25,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# allow_credentials=True is incompatible with a "*" origin - browsers reject the
+# combination - so only send credentials when origins are explicitly listed.
+_cors_origins = settings.cors_origin_list
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_cors_origins != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

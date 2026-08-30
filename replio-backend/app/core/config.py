@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
+from pydantic import field_validator
+from typing import Optional, List
+
 
 class Settings(BaseSettings):
     SECRET_KEY: str = "dev-secret-key-change-in-production"
@@ -21,8 +23,33 @@ class Settings(BaseSettings):
     APP_URL: str = "http://localhost:8000"
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # Comma-separated list of browser origins allowed to call this API.
+    # "*" is accepted for local development only.
+    CORS_ORIGINS: str = "*"
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def normalise_database_url(cls, v: str) -> str:
+        """Railway, Heroku and Fly inject `postgres://`, which SQLAlchemy 2 rejects.
+        Rewrite to the driver-qualified scheme so the same value works everywhere."""
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
+    @property
+    def cors_origin_list(self) -> List[str]:
+        raw = (self.CORS_ORIGINS or "").strip()
+        if raw in ("", "*"):
+            return ["*"]
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
+    @property
+    def is_production(self) -> bool:
+        return self.APP_ENV.lower() in ("production", "prod")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
 
 settings = Settings()

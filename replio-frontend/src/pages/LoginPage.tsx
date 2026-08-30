@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { Phone } from 'lucide-react'
+import { API_BASE_URL } from '../api/client'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -46,7 +47,7 @@ export default function LoginPage() {
 
     setSubmitting(true)
     try {
-      const response = await fetch('/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -65,7 +66,7 @@ export default function LoginPage() {
         setError(data.detail || 'Registration failed')
       }
     } catch {
-      setError('Registration error. Please try again.')
+      setError(`Cannot reach the server at ${API_BASE_URL}. Is the backend running?`)
     } finally {
       setSubmitting(false)
     }
