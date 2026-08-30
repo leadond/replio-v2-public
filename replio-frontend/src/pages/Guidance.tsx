@@ -18,6 +18,7 @@ import {
   Award,
   RefreshCw,
 } from 'lucide-react'
+import { apiClient } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { Alert } from '../components/Alert'
 import { LoadingSpinner } from '../components/LoadingSpinner'
@@ -100,89 +101,26 @@ export default function Guidance() {
         setLoading(true)
         setError(null)
 
-        // Mock AI-powered guidance suggestions
-        const mockGuidances: AIGuidance[] = [
-          {
-            id: 'guid-001',
-            type: 'response',
-            title: 'Account Security Reassurance',
-            description: 'Customer expresses concern about account security',
-            suggestion:
-              'Your account is secured with industry-leading encryption. We use multi-factor authentication and real-time fraud monitoring. All transactions are protected up to $250,000.',
-            confidence: 0.94,
-            source: 'Similar call history (892 matches)',
-            tags: ['security', 'account', 'trust'],
-          },
-          {
-            id: 'guid-002',
-            type: 'knowledge',
-            title: 'API Integration Setup Guide',
-            description: 'Customer needs help with API integration',
-            suggestion:
-              'Step 1: Generate API key in Settings > Developer\nStep 2: Use authentication header: Authorization: Bearer {API_KEY}\nStep 3: See documentation at developers.platform.com',
-            confidence: 0.88,
-            source: 'Knowledge Base - Technical',
-            tags: ['api', 'integration', 'technical'],
-          },
-          {
-            id: 'guid-003',
-            type: 'practice',
-            title: 'Upsell High-Value Customers',
-            description: 'This customer has high account activity and LTV',
-            suggestion:
-              'Best practice: Mention premium analytics features or portfolio management services. Customers similar to this one typically respond well to feature demonstrations.',
-            confidence: 0.82,
-            source: 'CRM Analytics',
-            tags: ['upsell', 'premium', 'high-value'],
-          },
-          {
-            id: 'guid-004',
-            type: 'escalation',
-            title: 'Escalation Protocol for Trading Disputes',
-            description: 'Customer disputes a transaction',
-            suggestion:
-              'Listen to full details. Document timestamps and trade IDs. Escalate to Trading Disputes team within 5 minutes. Do NOT close the ticket or acknowledge fault.',
-            confidence: 0.96,
-            source: 'Compliance Training',
-            tags: ['escalation', 'dispute', 'compliance'],
-          },
-          {
-            id: 'guid-005',
-            type: 'knowledge',
-            title: 'Tax Documentation for Crypto Trading',
-            description: 'Customer asks about tax reporting',
-            suggestion:
-              'We provide automated tax reports. Visit Account > Tax Reports to download. Each transaction is categorized as capital gain/loss. Consult a tax professional for personal advice.',
-            confidence: 0.85,
-            source: 'Knowledge Base - Tax & Compliance',
-            tags: ['tax', 'reporting', 'compliance'],
-          },
-          {
-            id: 'guid-006',
-            type: 'practice',
-            title: 'De-escalation Technique',
-            description: 'Customer tone indicates frustration',
-            suggestion:
-              'Acknowledge: "I understand this is frustrating." Use calm tone, slow pace. Offer specific next steps. Use customer\'s name. Offer direct contact for follow-up.',
-            confidence: 0.91,
-            source: 'Customer Service Training',
-            tags: ['soft-skills', 'de-escalation', 'communication'],
-          },
-        ]
+        const response = await apiClient.listGuidance(companyId)
+        const items: AIGuidance[] = Array.isArray(response?.guidance) ? response.guidance : []
 
+        setGuidances(items)
+        setSelectedGuidance(items[0] ?? null)
 
-        // Mock metrics
-        const mockMetrics: GuidanceMetrics = {
-          suggestions_shown: 1247,
-          suggestions_accepted: 891,
-          avg_confidence: 0.87,
-          helpful_rate: 0.94,
-          training_progress: 78,
-        }
-
-        setGuidances(mockGuidances)
-        setMetrics(mockMetrics)
-        setSelectedGuidance(mockGuidances[0])
+        // Metrics are derived from the guidance actually returned. When there is
+        // nothing to measure we show no metrics rather than invented ones.
+        setMetrics(
+          items.length > 0
+            ? {
+                suggestions_shown: items.length,
+                suggestions_accepted: 0,
+                avg_confidence:
+                  items.reduce((sum, g) => sum + (g.confidence ?? 0), 0) / items.length,
+                helpful_rate: 0,
+                training_progress: 0,
+              }
+            : null,
+        )
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load guidance')
       } finally {

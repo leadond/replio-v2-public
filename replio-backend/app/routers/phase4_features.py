@@ -169,12 +169,15 @@ async def create_escalation(
 
 @router.get("/escalations/pending")
 async def pending_escalations(
+    company_id: str = Query(...),
     limit: int = Query(50, le=200),
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
-    """Get pending escalations."""
-    escalations = EscalationService.list_pending_escalations(session, limit=limit)
+    """Get pending escalations for the caller's company."""
+    if current_user.company_id != company_id:
+        raise HTTPException(status_code=403, detail="Company mismatch")
+    escalations = EscalationService.list_pending_escalations(session, company_id, limit=limit)
     return {
         "count": len(escalations),
         "escalations": [
@@ -226,11 +229,14 @@ async def resolve_escalation(
 
 @router.get("/escalations/metrics")
 async def escalation_metrics(
+    company_id: str = Query(...),
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
-    """Get escalation metrics."""
-    return EscalationService.get_escalation_metrics(session)
+    """Get escalation metrics for the caller's company."""
+    if current_user.company_id != company_id:
+        raise HTTPException(status_code=403, detail="Company mismatch")
+    return EscalationService.get_escalation_metrics(session, company_id)
 
 
 # ============================================================================

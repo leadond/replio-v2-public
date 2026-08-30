@@ -550,7 +550,9 @@ export const apiClient = {
   // ========================================================================
 
   async listEscalations(companyId: string, status?: string, limit: number = 50, offset: number = 0) {
-    return request('GET', '/escalations/pending', {
+    // '/escalations' is the company-scoped list; '/escalations/pending' is a
+    // narrower pending-only view.
+    return request('GET', '/escalations', {
       query: { company_id: companyId, status, limit, offset },
     })
   },

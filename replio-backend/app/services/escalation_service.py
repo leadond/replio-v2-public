@@ -54,18 +54,30 @@ class EscalationService:
     @staticmethod
     def list_pending_escalations(
         session: Session,
+        company_id: str,
         user_id: Optional[str] = None,
         limit: int = 50,
     ) -> List[Escalation]:
-        """List pending escalations."""
-        stmt = select(Escalation).where(Escalation.status == "pending")
+        """List pending escalations for one company.
+
+        company_id is required: Escalation carries no company column, so without
+        the join through Conversation this returns every tenant's escalations.
+        """
+        from app.models.conversation import Conversation
+
+        stmt = (
+            select(Escalation)
+            .join(Conversation, Conversation.id == Escalation.conversation_id)
+            .where(Conversation.company_id == company_id)
+            .where(Escalation.status == "pending")
+        )
 
         if user_id:
             stmt = stmt.where(Escalation.assigned_to_user_id == user_id)
 
         stmt = stmt.order_by(Escalation.priority.desc()).limit(limit)
 
-        return session.exec(stmt).all()
+        return list(session.exec(stmt).all())
 
     @staticmethod
     def assign_escalation(
@@ -119,20 +131,27 @@ class EscalationService:
     @staticmethod
     def get_escalation_metrics(
         session: Session,
-        company_id: Optional[str] = None,
+        company_id: str,
     ) -> Dict[str, Any]:
-        """Get escalation statistics."""
-        pending = session.exec(
-            select(Escalation).where(Escalation.status == "pending")
-        ).all()
+        """Get escalation statistics for one company.
 
-        in_progress = session.exec(
-            select(Escalation).where(Escalation.status == "in_progress")
-        ).all()
+        Previously this accepted company_id and ignored it, so every tenant saw
+        global counts. Scoping now goes through the owning conversation.
+        """
+        from app.models.conversation import Conversation
 
-        resolved = session.exec(
-            select(Escalation).where(Escalation.status == "resolved")
-        ).all()
+        def _by_status(status: str):
+            stmt = (
+                select(Escalation)
+                .join(Conversation, Conversation.id == Escalation.conversation_id)
+                .where(Conversation.company_id == company_id)
+                .where(Escalation.status == status)
+            )
+            return list(session.exec(stmt).all())
+
+        pending = _by_status("pending")
+        in_progress = _by_status("in_progress")
+        resolved = _by_status("resolved")
 
         # Count by priority
         critical = sum(1 for e in (pending + in_progress) if e.priority == "critical")
