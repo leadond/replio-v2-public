@@ -2,7 +2,7 @@
  * Error Boundary - Component for catching and displaying errors
  */
 
-import React, { Component, ReactNode, ErrorInfo } from 'react'
+import { Component, ReactNode, ErrorInfo } from 'react'
 import { AlertCircle, RefreshCw } from 'lucide-react'
 
 interface Props {
@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
               An unexpected error occurred. Please try refreshing the page or contact support if the problem persists.
             </p>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <details style={{
                 textAlign: 'left',
                 backgroundColor: 'rgba(0,0,0,0.2)',

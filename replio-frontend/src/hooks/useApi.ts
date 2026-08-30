@@ -32,7 +32,7 @@ export function useApi<T>(
   fn: () => Promise<T>,
   options: UseApiOptions = {},
 ): UseApiState<T> {
-  const { immediate = true, onSuccess, onError, cache = true, retryCount = 3, deps } = options
+  const { immediate = true, onSuccess, onError, retryCount = 3 } = options
 
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(immediate)

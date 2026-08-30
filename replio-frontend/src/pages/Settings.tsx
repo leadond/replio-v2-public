@@ -3,24 +3,18 @@
  * Production-ready with complete US and international timezone support
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Save,
   Copy,
-  Eye,
-  EyeOff,
   Plus,
   Trash2,
   Users,
-  Lock,
   Bell,
   Zap,
   Settings as SettingsIcon,
-  Check,
-  AlertCircle,
   Shield,
-  Key,
-} from 'lucide-react'
+  } from 'lucide-react'
 import { apiClient } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { Alert } from '../components/Alert'
@@ -107,10 +101,14 @@ export default function Settings() {
   const [newMemberRole, setNewMemberRole] = useState<'admin' | 'manager' | 'agent'>('agent')
 
   // Integration Settings
-  const [twilio, setTwilio] = useState({ enabled: true, configuredAt: '2026-08-15' })
-  const [slack, setSlack] = useState({ enabled: true, configuredAt: '2026-08-10' })
-  const [salesforce, setSalesforce] = useState({ enabled: false, configuredAt: null })
-  const [hubspot, setHubspot] = useState({ enabled: false, configuredAt: null })
+  // There is no backend for third-party integrations yet, so these are listed as
+  // available-but-unconfigured rather than reporting a connection that does not exist.
+  const AVAILABLE_INTEGRATIONS = [
+    'Twilio (Phone Calls)',
+    'Slack',
+    'Salesforce',
+    'HubSpot',
+  ]
 
   // Notification Settings
   const [emailNotifications, setEmailNotifications] = useState(true)
@@ -120,18 +118,9 @@ export default function Settings() {
 
   // Security Settings
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([
-    {
-      id: '1',
-      name: 'Production API Key',
-      key: 'sk_prod_••••••••••••••••••••••••',
-      created_at: '2026-08-01',
-      last_used: '2026-08-29',
-    },
-  ])
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
   const [newApiKeyName, setNewApiKeyName] = useState('')
   const [showApiKeyForm, setShowApiKeyForm] = useState(false)
-  const [visibleApiKeyId, setVisibleApiKeyId] = useState<string | null>(null)
 
   // UI State
   const [loading, setLoading] = useState(false)
@@ -545,14 +534,12 @@ export default function Settings() {
       case 'integrations':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {[
-              { name: 'Twilio (Phone Calls)', state: twilio, setState: setTwilio },
-              { name: 'Slack', state: slack, setState: setSlack },
-              { name: 'Salesforce', state: salesforce, setState: setSalesforce },
-              { name: 'HubSpot', state: hubspot, setState: setHubspot },
-            ].map(integration => (
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
+              Third-party integrations are not yet available. None are connected.
+            </p>
+            {AVAILABLE_INTEGRATIONS.map(name => (
               <div
-                key={integration.name}
+                key={name}
                 style={{
                   padding: '16px',
                   background: 'rgba(15, 23, 42, 0.4)',
@@ -561,37 +548,15 @@ export default function Settings() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  opacity: 0.7,
                 }}
               >
-                <div>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: '#ffffff', margin: '0 0 4px 0' }}>
-                    {integration.name}
-                  </p>
-                  {integration.state.configuredAt && (
-                    <p style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.6)', margin: 0 }}>
-                      Configured {integration.state.configuredAt}
-                    </p>
-                  )}
-                </div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: integration.state.enabled ? '#00ffaa' : 'rgba(255, 255, 255, 0.6)',
-                    }}
-                  >
-                    {integration.state.enabled ? 'Connected' : 'Not Connected'}
-                  </span>
-                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={integration.state.enabled}
-                      onChange={e => integration.setState({ ...integration.state, enabled: e.target.checked })}
-                      style={{ marginRight: '8px', cursor: 'pointer' }}
-                    />
-                  </label>
-                </div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: '#ffffff', margin: 0 }}>
+                  {name}
+                </p>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255, 255, 255, 0.6)' }}>
+                  Not connected
+                </span>
               </div>
             ))}
           </div>

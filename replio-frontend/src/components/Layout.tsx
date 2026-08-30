@@ -1,8 +1,8 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
-  Phone, Users, MessageSquare, Settings, LogOut, BarChart3,
-  Inbox, FileText, Clock, AlertCircle, Book, MessageCircle, HelpCircle, Zap
+  Phone, Users, Settings, LogOut, BarChart3,
+  Inbox, FileText, Clock, AlertCircle, Book, MessageCircle, HelpCircle
 } from 'lucide-react'
 
 const nav = [

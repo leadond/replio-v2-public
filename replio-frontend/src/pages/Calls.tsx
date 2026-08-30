@@ -26,9 +26,24 @@ export default function Calls() {
   const [initiatingCall, setInitiatingCall] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
+  // Whether SignalWire is actually usable. Until we know, the dial form stays
+  // disabled rather than inviting a call that can only fail.
+  const [callConfig, setCallConfig] = useState<{
+    configured: boolean
+    missing_settings: string[]
+    from_number: string | null
+  } | null>(null)
+
+  useEffect(() => {
+    apiClient
+      .getCallConfig()
+      .then(setCallConfig)
+      .catch(() => setCallConfig({ configured: false, missing_settings: [], from_number: null }))
+  }, [])
+
   useEffect(() => {
     fetchCalls()
-    const interval = setInterval(fetchCalls, 5000)
+    const interval = setInterval(fetchCalls, 15000)
     return () => clearInterval(interval)
   }, [companyId])
 
@@ -37,9 +52,12 @@ export default function Calls() {
     try {
       setLoading(true)
       const data = await apiClient.listCalls(50, 0)
-      setCalls(data.calls || [])
+      setCalls(Array.isArray(data?.calls) ? data.calls : [])
+      setError(null)
     } catch (err) {
-      console.error('Failed to load calls:', err)
+      // Surface the real reason instead of silently showing an empty table.
+      setError(err instanceof Error ? err.message : 'Failed to load calls')
+      setCalls([])
     } finally {
       setLoading(false)
     }
@@ -128,12 +146,21 @@ export default function Calls() {
             <Plus size={24} color="var(--accent)" />
             <h2 style={{ fontSize: 18, fontWeight: 600 }}>Initiate Call</h2>
           </div>
+          {callConfig && !callConfig.configured && (
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 0 }}>
+              Outbound calling is unavailable
+              {callConfig.missing_settings.length > 0
+                ? `: ${callConfig.missing_settings.join(', ')} not set`
+                : '. Check the SignalWire configuration.'}
+            </p>
+          )}
           <form onSubmit={handleInitiateCall} style={{ marginTop: 16 }}>
             <input
               type="tel"
               placeholder="Phone number (e.g., +14155552671)"
               value={newCallPhone}
               onChange={(e) => setNewCallPhone(e.target.value)}
+              disabled={callConfig ? !callConfig.configured : true}
               style={{
                 width: '100%',
                 padding: '10px 12px',
@@ -146,7 +173,7 @@ export default function Calls() {
             />
             <button
               type="submit"
-              disabled={initiatingCall}
+              disabled={initiatingCall || !callConfig?.configured}
               style={{
                 width: '100%',
                 padding: '10px 12px',
@@ -155,8 +182,8 @@ export default function Calls() {
                 border: 'none',
                 borderRadius: 8,
                 fontWeight: 600,
-                cursor: initiatingCall ? 'not-allowed' : 'pointer',
-                opacity: initiatingCall ? 0.6 : 1,
+                cursor: initiatingCall || !callConfig?.configured ? 'not-allowed' : 'pointer',
+                opacity: initiatingCall || !callConfig?.configured ? 0.6 : 1,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

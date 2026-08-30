@@ -3,7 +3,7 @@ from sqlmodel import Session
 from typing import Optional, Dict, Any
 from app.core.config import settings
 from app.core.database import get_session
-from app.services.signalwire_service import SignalWireService
+from app.services.signalwire_service import SignalWireService, SignalWireConfigError
 from app.routers.auth import get_current_user
 from app.models.user import User
 import httpx
@@ -58,38 +58,54 @@ async def list_numbers():
         return r.json() if r.status_code == 200 else {"error": r.text, "status": r.status_code}
 
 
+
 # ============================================================================
 # OUTBOUND CALLS ENDPOINTS
 # ============================================================================
 
+@calls_router.get("/config")
+async def call_config(
+    current_user: User = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """Report whether outbound calling is actually usable.
+
+    The UI uses this to explain *why* calling is unavailable instead of
+    presenting a dial form that can only fail.
+    """
+    missing = SignalWireService.missing_settings()
+    return {
+        "configured": not missing,
+        "missing_settings": missing,
+        "from_number": settings.SIGNALWIRE_PHONE_NUMBER or None,
+    }
+
+
 @calls_router.post("/initiate")
 async def initiate_call(
     to_number: str = Query(...),
-    from_number: Optional[str] = None,
-    caller_id: Optional[str] = None,
     company_id: str = Query(...),
+    from_number: Optional[str] = None,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """Initiate an outbound call to a phone number."""
+    if current_user.company_id != company_id:
+        raise HTTPException(status_code=403, detail="Company mismatch")
     try:
-        if not from_number:
-            from_number = settings.SIGNALWIRE_PHONE_NUMBER
-
         result = await SignalWireService.initiate_call(to_number, from_number)
+    except SignalWireConfigError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
-        if "error" in result:
-            raise HTTPException(status_code=400, detail=result.get("error", "Failed to initiate call"))
+    if "error" in result:
+        raise HTTPException(status_code=502, detail=result["error"])
 
-        return {
-            "success": True,
-            "call_id": result.get("sid"),
-            "to_number": to_number,
-            "from_number": from_number,
-            "status": result.get("status"),
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {
+        "success": True,
+        "call_id": result.get("sid"),
+        "to_number": to_number,
+        "from_number": from_number or settings.SIGNALWIRE_PHONE_NUMBER,
+        "status": result.get("status"),
+    }
 
 
 @calls_router.get("/list")
@@ -99,12 +115,15 @@ async def list_calls(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
-    """List recent calls."""
+    """List recent calls from SignalWire."""
     try:
-        calls = await SignalWireService.list_calls(limit, offset)
-        return calls
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        result = await SignalWireService.list_calls(limit, offset)
+    except SignalWireConfigError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    if "error" in result:
+        raise HTTPException(status_code=502, detail=result["error"])
+    return result
 
 
 @calls_router.post("/{call_id}/hangup")
@@ -116,13 +135,12 @@ async def hangup_call(
     """End an ongoing call."""
     try:
         result = await SignalWireService.hangup_call(call_id)
+    except SignalWireConfigError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
-        if result.get("success"):
-            return {"success": True, "message": f"Call {call_id} ended"}
-        else:
-            raise HTTPException(status_code=400, detail=result.get("error", "Failed to hangup call"))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    if not result.get("success"):
+        raise HTTPException(status_code=502, detail=result.get("error", "Failed to hang up call"))
+    return {"success": True, "message": f"Call {call_id} ended"}
 
 
 @calls_router.get("/{call_id}")
@@ -133,9 +151,10 @@ async def get_call_status(
 ) -> Dict[str, Any]:
     """Get the status of a specific call."""
     try:
-        call_info = await SignalWireService.get_call(call_id)
-        if "error" in call_info:
-            raise HTTPException(status_code=404, detail=call_info.get("error"))
-        return call_info
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        result = await SignalWireService.get_call(call_id)
+    except SignalWireConfigError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result

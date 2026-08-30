@@ -65,7 +65,7 @@ export function isTokenExpired(): boolean {
 /**
  * Format error message for user display
  */
-function formatErrorMessage(code: string, status?: number, details?: any): string {
+function formatErrorMessage(code: string, _status?: number, details?: any): string {
   const messages: Record<string, string> = {
     [ErrorCode.NETWORK_ERROR]: 'Network error. Please check your connection.',
     [ErrorCode.TIMEOUT]: 'Request timeout. Please try again.',
@@ -151,7 +151,7 @@ async function retryWithBackoff<T>(
 /**
  * Make HTTP request with authentication, error handling, and retry logic
  */
-async function request<T>(
+async function request<T = any>(
   method: string,
   path: string,
   options: {
@@ -699,6 +699,14 @@ export const apiClient = {
   // OUTBOUND CALLS
   // ============================================================================
 
+  async getCallConfig(): Promise<{
+    configured: boolean
+    missing_settings: string[]
+    from_number: string | null
+  }> {
+    return request('GET', '/calls/config', { useCache: false })
+  },
+
   async initiateCall(companyId: string, toNumber: string, fromNumber?: string) {
     return request('POST', '/calls/initiate', {
       query: { company_id: companyId, to_number: toNumber, from_number: fromNumber },
@@ -726,6 +734,6 @@ export type { ApiError }
  * Legacy apiFetch - for backwards compatibility with old components
  * Use apiClient methods instead for new code
  */
-export async function apiFetch(path: string, options: RequestInit = {}) {
+export async function apiFetch(path: string, _options: RequestInit = {}) {
   return request('GET', path, { useCache: false })
 }

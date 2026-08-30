@@ -2,7 +2,7 @@
  * Alert - Error, warning, success, and info messages
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react'
 
 export type AlertType = 'error' | 'warning' | 'success' | 'info'

@@ -2,7 +2,7 @@
  * Callers Page - Full CRUD for contact management
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Search, Phone, Mail, History } from 'lucide-react'
 import { apiClient } from '../api/client'
 import { useAuth } from '../context/AuthContext'

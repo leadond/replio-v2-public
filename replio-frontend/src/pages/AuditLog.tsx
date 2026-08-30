@@ -3,12 +3,11 @@
  * Real-time activity feed with filtering, searching, and export functionality
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Search,
   Filter,
   Download,
-  Calendar,
   User,
   Clock,
   CheckCircle2,
