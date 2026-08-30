@@ -8,7 +8,7 @@ class Caller(SQLModel, table=True):
     phone_number: str = Field(index=True)
     name: Optional[str] = None
     email: Optional[str] = None
-    company_id: str = Field(foreign_key="companies.id", index=True)
+    company_id: str = Field(foreign_key="company.id", index=True)
     last_call_at: Optional[str] = None
     total_calls: int = Field(default=0)
     total_duration_seconds: float = Field(default=0.0)

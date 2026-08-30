@@ -5,8 +5,8 @@ import uuid
 
 class Conversation(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    caller_id: str = Field(foreign_key="callers.id", index=True)
-    company_id: str = Field(foreign_key="companies.id", index=True)
+    caller_id: str = Field(foreign_key="caller.id", index=True)
+    company_id: str = Field(foreign_key="company.id", index=True)
     call_sid: Optional[str] = None
     elevenlabs_conversation_id: Optional[str] = None
     status: str = Field(default="in_progress")

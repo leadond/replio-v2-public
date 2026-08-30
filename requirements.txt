@@ -1,0 +1,3 @@
+# Repo-root requirements so Railpack detects this as a Python app.
+# The backend lives in replio-backend/; this delegates to its real dependency list.
+-r replio-backend/requirements.txt

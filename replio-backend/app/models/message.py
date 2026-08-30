@@ -5,7 +5,7 @@ import uuid
 
 class Message(SQLModel, table=True):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    conversation_id: str = Field(foreign_key="conversations.id", index=True)
+    conversation_id: str = Field(foreign_key="conversation.id", index=True)
     role: str = Field(default="caller")
     content: str
     source: str = Field(default="voice")

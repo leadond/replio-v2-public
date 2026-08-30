@@ -158,3 +158,21 @@ class KnowledgeBaseService:
             "categories": list(categories),
             "total_usage": total_usage,
         }
+
+    @staticmethod
+    def list_articles(
+        session: Session,
+        company_id: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[KnowledgeBase]:
+        """List knowledge base articles for a company, newest first."""
+        stmt = (
+            select(KnowledgeBase)
+            .where(KnowledgeBase.company_id == company_id)
+            .order_by(KnowledgeBase.updated_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        return list(session.exec(stmt).all())
+

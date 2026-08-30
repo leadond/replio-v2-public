@@ -175,6 +175,44 @@ class ChatService:
         return session.exec(stmt).all()
 
 
+    @staticmethod
+    def list_sessions(
+        session: Session,
+        company_id: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list:
+        """List distinct chat sessions for a company, most recent first.
+
+        ChatMessage has no company_id - sessions are scoped through the
+        conversation each message belongs to.
+        """
+        from sqlmodel import select, func
+        from app.models.conversation import Conversation
+
+        stmt = (
+            select(
+                ChatMessage.session_id,
+                func.max(ChatMessage.created_at).label("last_message_at"),
+                func.count(ChatMessage.id).label("message_count"),
+            )
+            .join(Conversation, Conversation.id == ChatMessage.conversation_id)
+            .where(Conversation.company_id == company_id)
+            .group_by(ChatMessage.session_id)
+            .order_by(func.max(ChatMessage.created_at).desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        return [
+            {
+                "session_id": row[0],
+                "last_message_at": row[1].isoformat() if row[1] else None,
+                "message_count": row[2],
+            }
+            for row in session.exec(stmt).all()
+        ]
+
+
 class AppointmentService:
     """Handle appointments and scheduling."""
 
@@ -248,3 +286,24 @@ class AppointmentService:
             logger.info(f"Appointment {appointment_id} cancelled")
 
         return appointment
+
+    @staticmethod
+    def list_appointments(
+        session: Session,
+        company_id: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list:
+        """List appointments for a company, soonest first."""
+        from sqlmodel import select
+        from app.models.knowledge_base import Appointment
+
+        stmt = (
+            select(Appointment)
+            .where(Appointment.company_id == company_id)
+            .order_by(Appointment.scheduled_time.asc())
+            .offset(offset)
+            .limit(limit)
+        )
+        return list(session.exec(stmt).all())
+

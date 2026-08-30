@@ -152,3 +152,29 @@ class EscalationService:
                 "specialist": sum(1 for e in (pending + in_progress) if e.escalation_type == "specialist"),
             }
         }
+
+    @staticmethod
+    def list_escalations(
+        session: Session,
+        company_id: str,
+        status: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[Escalation]:
+        """List escalations for a company.
+
+        Escalation has no company_id of its own - it is scoped through the
+        conversation it belongs to, so this joins rather than filtering directly.
+        """
+        from app.models.conversation import Conversation
+
+        stmt = (
+            select(Escalation)
+            .join(Conversation, Conversation.id == Escalation.conversation_id)
+            .where(Conversation.company_id == company_id)
+        )
+        if status:
+            stmt = stmt.where(Escalation.status == status)
+        stmt = stmt.order_by(Escalation.created_at.desc()).offset(offset).limit(limit)
+        return list(session.exec(stmt).all())
+

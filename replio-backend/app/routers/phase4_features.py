@@ -527,8 +527,10 @@ async def list_escalations(
         escalations = EscalationService.list_escalations(session, company_id, status, limit, offset)
         return {"escalations": escalations, "limit": limit, "offset": offset}
     except Exception as e:
-        logger.error(f"Error listing escalations: {e}")
-        return {"escalations": [], "limit": limit, "offset": offset}
+        logger.error(f"Error listing escalations: {e}", exc_info=True)
+        # Never report an empty list for a failed query - that is a false
+        # statement about the data. Surface the failure instead.
+        raise HTTPException(status_code=500, detail=f"Failed to list escalations: {e}")
 
 
 @router.get("/knowledge-base")
@@ -544,8 +546,10 @@ async def list_knowledge_base(
         articles = KnowledgeBaseService.list_articles(session, company_id, limit, offset)
         return {"articles": articles, "limit": limit, "offset": offset}
     except Exception as e:
-        logger.error(f"Error listing knowledge base: {e}")
-        return {"articles": [], "limit": limit, "offset": offset}
+        logger.error(f"Error listing knowledge base: {e}", exc_info=True)
+        # Never report an empty list for a failed query - that is a false
+        # statement about the data. Surface the failure instead.
+        raise HTTPException(status_code=500, detail=f"Failed to list knowledge base: {e}")
 
 
 @router.get("/guidance")
@@ -561,8 +565,10 @@ async def list_guidance(
         guidance_items = []
         return {"guidance": guidance_items, "limit": limit, "offset": offset}
     except Exception as e:
-        logger.error(f"Error listing guidance: {e}")
-        return {"guidance": [], "limit": limit, "offset": offset}
+        logger.error(f"Error listing guidance: {e}", exc_info=True)
+        # Never report an empty list for a failed query - that is a false
+        # statement about the data. Surface the failure instead.
+        raise HTTPException(status_code=500, detail=f"Failed to list guidance: {e}")
 
 
 @router.get("/chat")
@@ -578,8 +584,10 @@ async def list_chat_sessions(
         chat_sessions = ChatService.list_sessions(session, company_id, limit, offset)
         return {"sessions": chat_sessions, "limit": limit, "offset": offset}
     except Exception as e:
-        logger.error(f"Error listing chat sessions: {e}")
-        return {"sessions": [], "limit": limit, "offset": offset}
+        logger.error(f"Error listing chat sessions: {e}", exc_info=True)
+        # Never report an empty list for a failed query - that is a false
+        # statement about the data. Surface the failure instead.
+        raise HTTPException(status_code=500, detail=f"Failed to list chat sessions: {e}")
 
 
 @router.get("/appointments")
@@ -595,8 +603,10 @@ async def list_appointments(
         appointments = AppointmentService.list_appointments(session, company_id, limit, offset)
         return {"appointments": appointments, "limit": limit, "offset": offset}
     except Exception as e:
-        logger.error(f"Error listing appointments: {e}")
-        return {"appointments": [], "limit": limit, "offset": offset}
+        logger.error(f"Error listing appointments: {e}", exc_info=True)
+        # Never report an empty list for a failed query - that is a false
+        # statement about the data. Surface the failure instead.
+        raise HTTPException(status_code=500, detail=f"Failed to list appointments: {e}")
 
 
 @router.get("/reports")
@@ -613,5 +623,7 @@ async def list_reports(
         reports = []
         return {"reports": reports, "limit": limit, "offset": offset}
     except Exception as e:
-        logger.error(f"Error listing reports: {e}")
-        return {"reports": [], "limit": limit, "offset": offset}
+        logger.error(f"Error listing reports: {e}", exc_info=True)
+        # Never report an empty list for a failed query - that is a false
+        # statement about the data. Surface the failure instead.
+        raise HTTPException(status_code=500, detail=f"Failed to list reports: {e}")
