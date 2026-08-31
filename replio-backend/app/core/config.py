@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.2:3b"
     OPENAI_API_KEY: Optional[str] = None
+
+    # Local AI inference (hybrid deployment)
+    LOCAL_AI_ENABLED: bool = False
+    LOCAL_AI_API_KEY: str = "default-key-change-in-production"
+    OPENCLAW_URL: str = "http://localhost:20000"
+    LLAMA_CPP_URL: str = "http://localhost:20001"
     APP_ENV: str = "development"
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000

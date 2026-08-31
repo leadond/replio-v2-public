@@ -55,8 +55,13 @@ export default function Calls() {
       setCalls(Array.isArray(data?.calls) ? data.calls : [])
       setError(null)
     } catch (err) {
-      // Surface the real reason instead of silently showing an empty table.
-      setError(err instanceof Error ? err.message : 'Failed to load calls')
+      // 503 = SignalWire not configured; show a friendly message instead
+      const msg = err instanceof Error ? err.message : 'Failed to load calls'
+      if (msg.includes('503') || msg.includes('Service Unavailable')) {
+        setError('Outbound calling is not configured. Set up SignalWire credentials to enable calls.')
+      } else {
+        setError(msg)
+      }
       setCalls([])
     } finally {
       setLoading(false)
