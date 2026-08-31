@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     LOCAL_AI_API_KEY: str = "default-key-change-in-production"
     OPENCLAW_URL: str = "http://localhost:20000"
     LLAMA_CPP_URL: str = "http://localhost:20001"
+
+    # Plivo telephony service
+    PLIVO_ENABLED: bool = False
+    PLIVO_AUTH_ID: str = ""
+    PLIVO_AUTH_TOKEN: str = ""
+    PLIVO_DEFAULT_PHONE: str = ""  # Your Plivo phone number
     APP_ENV: str = "development"
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000

@@ -1,0 +1,23 @@
+﻿{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 20000,
+    "api_key": "your-secure-api-key-min-32-chars-change-this-xyz123"
+  },
+  "models": {
+    "qwen": {
+      "model_name": "Qwen/Qwen2.5-32B-Instruct",
+      "quantization": "int8",
+      "device": "cuda",
+      "max_tokens": 2048,
+      "temperature": 0.7
+    }
+  },
+  "inference": {
+    "batch_size": 4,
+    "max_concurrent_requests": 10,
+    "timeout_seconds": 30,
+    "enable_gpu_layers": true,
+    "gpu_layers": 40
+  }
+}

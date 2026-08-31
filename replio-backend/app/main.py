@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from app.core.database import engine
 from app.core.config import settings
 from sqlmodel import SQLModel
-from app.routers import health, auth, callers, conversations, signalwire, elevenlabs, dashboard, ollama, audit, phase4_features, local_ai
+from app.routers import health, auth, callers, conversations, signalwire, elevenlabs, dashboard, ollama, audit, phase4_features, local_ai, plivo
 from app.routers import settings as settings_router
 from app.routers.signalwire import calls_router
 
@@ -49,6 +49,7 @@ app.include_router(ollama.router)
 app.include_router(audit.router)
 app.include_router(phase4_features.router)
 app.include_router(local_ai.router)
+app.include_router(plivo.router)
 
 @app.get("/api/")
 async def root():
