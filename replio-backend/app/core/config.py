@@ -68,4 +68,14 @@ class Settings(BaseSettings):
         # For local development, create a .env file with dev values (keep it out of git).
 
 
+import os
 settings = Settings()
+
+# Diagnostic: Log what DATABASE_URL the app is using
+print(f"[CONFIG] APP_ENV={settings.APP_ENV}")
+print(f"[CONFIG] DATABASE_URL={settings.DATABASE_URL[:50]}...")
+print(f"[CONFIG] Is production: {settings.is_production}")
+if os.environ.get("DATABASE_URL"):
+    print(f"[CONFIG] Found DATABASE_URL in environment: {os.environ.get('DATABASE_URL')[:50]}...")
+else:
+    print("[CONFIG] WARNING: DATABASE_URL not found in environment, using default")
