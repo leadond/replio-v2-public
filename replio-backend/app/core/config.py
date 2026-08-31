@@ -61,23 +61,11 @@ class Settings(BaseSettings):
         return self.APP_ENV.lower() in ("production", "prod")
 
     class Config:
-        # Only load .env for local development. In production (Railway, etc.),
-        # rely entirely on environment variables to avoid accidentally shipping
-        # dev secrets or hardcoded localhost connections.
-        env_file = ".env"
-        env_file_encoding = "utf-8"
         case_sensitive = True  # DATABASE_URL, not database_url
-
-        @classmethod
-        def settings_customise_sources(cls, settings_cls, init_settings, env_settings, dotenv_settings, file_settings, env_nested_delimiter=None):
-            """In production, ignore .env file and only use environment variables."""
-            # Determine if we're in production
-            app_env = init_settings.get("APP_ENV") or env_settings.get("APP_ENV") or "development"
-            if app_env.lower() in ("production", "prod"):
-                # Skip .env file for production
-                return (env_settings, init_settings)
-            # For development, include .env
-            return (init_settings, env_settings, dotenv_settings, file_settings)
+        # Note: Do NOT use env_file in production. In Railway/cloud deployments,
+        # all config comes from environment variables. Loading .env would shadow them
+        # and cause hardcoded localhost values to override real database URLs.
+        # For local development, create a .env file with dev values (keep it out of git).
 
 
 settings = Settings()
