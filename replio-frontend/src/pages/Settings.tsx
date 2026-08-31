@@ -285,6 +285,28 @@ export default function Settings() {
 
                 <div>
                   <label style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '6px', display: 'block' }}>
+                    Company ID
+                  </label>
+                  <input
+                    type="text"
+                    value={companyId}
+                    readOnly
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      background: 'rgba(15, 23, 42, 0.6)',
+                      border: '1px solid rgba(45, 212, 191, 0.1)',
+                      borderRadius: '6px',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      fontSize: 14,
+                      boxSizing: 'border-box',
+                      fontFamily: 'monospace',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '6px', display: 'block' }}>
                     Timezone
                   </label>
                   <select
@@ -474,7 +496,7 @@ export default function Settings() {
               <h3 style={{ fontSize: 16, fontWeight: 600, color: '#ffffff', margin: '0 0 16px 0' }}>
                 Add Team Member
               </h3>
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'stretch' }}>
                 <input
                   type="email"
                   placeholder="Enter email address"
@@ -482,12 +504,14 @@ export default function Settings() {
                   onChange={e => setNewMemberEmail(e.target.value)}
                   style={{
                     flex: 1,
+                    minWidth: 0,
                     padding: '10px 12px',
                     background: 'rgba(15, 23, 42, 0.4)',
                     border: '1px solid rgba(45, 212, 191, 0.15)',
                     borderRadius: '6px',
                     color: '#ffffff',
                     fontSize: 14,
+                    boxSizing: 'border-box',
                   }}
                 />
                 <select
@@ -500,6 +524,8 @@ export default function Settings() {
                     borderRadius: '6px',
                     color: '#ffffff',
                     fontSize: 14,
+                    boxSizing: 'border-box',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <option value="agent">Agent</option>

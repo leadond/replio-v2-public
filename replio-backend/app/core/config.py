@@ -6,10 +6,10 @@ from typing import Optional, List
 class Settings(BaseSettings):
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    DATABASE_URL: str = Field(
-        default="postgresql://replio:replio@localhost:5432/replio",
-        description="Database connection string. Must be set in production via environment variable.",
-    )
+    # DATABASE_URL is REQUIRED from environment. No fallback default.
+    # This forces Railway/production to fail loudly if not set, rather than
+    # silently using a hardcoded localhost value.
+    DATABASE_URL: str
     SIGNALWIRE_PROJECT_ID: str = ""
     SIGNALWIRE_API_TOKEN: str = ""
     SIGNALWIRE_SPACE: str = ""
