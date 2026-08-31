@@ -1,12 +1,15 @@
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
+from pydantic import field_validator, Field
 from typing import Optional, List
 
 
 class Settings(BaseSettings):
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    DATABASE_URL: str = "postgresql://replio:replio@localhost:5432/replio"
+    DATABASE_URL: str = Field(
+        default="postgresql://replio:replio@localhost:5432/replio",
+        description="Database connection string. Must be set in production via environment variable.",
+    )
     SIGNALWIRE_PROJECT_ID: str = ""
     SIGNALWIRE_API_TOKEN: str = ""
     SIGNALWIRE_SPACE: str = ""
@@ -35,6 +38,16 @@ class Settings(BaseSettings):
         if v.startswith("postgres://"):
             return v.replace("postgres://", "postgresql://", 1)
         return v
+
+    def model_post_init(self, __context):
+        """Validate production configuration after all fields are set."""
+        if self.is_production:
+            localhost_default = "postgresql://replio:replio@localhost:5432/replio"
+            if self.DATABASE_URL == localhost_default:
+                raise ValueError(
+                    "DATABASE_URL must be set via environment variable in production. "
+                    f"Got the hardcoded local default instead: {localhost_default}"
+                )
 
     @property
     def cors_origin_list(self) -> List[str]:
