@@ -540,7 +540,7 @@ export const apiClient = {
     limit: number = 50,
     offset: number = 0,
   ) {
-    return request('GET', '/audit-logs', {
+    return request('GET', '/audit/trail', {
       query: { company_id: companyId, limit, offset },
     })
   },
